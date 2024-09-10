@@ -1,25 +1,49 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { WiDaySunny, WiCloud, WiRain, WiStrongWind } from "react-icons/wi";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// Register the necessary components with Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface WeatherData {
   temperature: number;
   windspeed: number;
   weathercode: number;
+  humidity: number;
+  pressure: number;
 }
 
 export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [hourlyTemperature, setHourlyTemperature] = useState<number[]>([]);
+  const [labels, setLabels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState<{ lat: string, lon: string }>({ lat: '', lon: '' });
 
   useEffect(() => {
-    if (!manualLocation.lat || !manualLocation.lon) {
-      navigator.geolocation.getCurrentPosition(success, error);
-    }
+    navigator.geolocation.getCurrentPosition(success, error);
 
     function success(position: GeolocationPosition) {
       const { latitude, longitude } = position.coords;
@@ -30,13 +54,24 @@ export default function Home() {
       setError('Unable to retrieve location automatically');
       setLoading(false);
     }
-  }, [manualLocation]);
+  }, []);
 
   const fetchWeather = (lat: number | string, lon: number | string) => {
     axios
       .get(`/api/weather?lat=${lat}&lon=${lon}`)
       .then(response => {
-        setWeather(response.data.current_weather);
+        const currentWeather = response.data.current_weather;
+        const additionalData = response.data.hourly;
+        setWeather({
+          temperature: currentWeather.temperature,
+          windspeed: currentWeather.windspeed,
+          weathercode: currentWeather.weathercode,
+          humidity: additionalData.relative_humidity_2m[0],
+          pressure: additionalData.pressure_msl[0],
+        });
+
+        setHourlyTemperature(additionalData.temperature_2m.slice(0, 12));
+        setLabels(additionalData.time.slice(0, 12).map((time: string) => new Date(time).toLocaleTimeString()));
         setLoading(false);
       })
       .catch(() => {
@@ -52,73 +87,72 @@ export default function Home() {
     }
   };
 
+  const getWeatherIcon = (weatherCode: number) => {
+    switch (weatherCode) {
+      case 0: return <WiDaySunny size={50} />;
+      case 1: return <WiCloud size={50} />;
+      case 2: return <WiRain size={50} />;
+      default: return <WiStrongWind size={50} />;
+    }
+  };
+
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Temperature (°C)',
+        data: hourlyTemperature,
+        borderColor: 'rgba(75,192,192,1)',
+        backgroundColor: 'rgba(75,192,192,0.2)',
+        fill: true,
+      },
+    ],
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        {/* Weather Information */}
-        <div className="flex flex-col gap-8">
-          {loading && <div>Loading weather data...</div>}
-          {error && <div>{error}</div>}
-          {weather && (
-            <div className="weather-container">
-              <h2>Current Weather</h2>
-              <p>Temperature: {weather.temperature}°C</p>
-              <p>Windspeed: {weather.windspeed} km/h</p>
-            </div>
-          )}
-
-          {/* Manual Location Input */}
-          <h3>Manual Location Input</h3>
-          <form onSubmit={handleManualSubmit}>
-            <label>
-              Latitude:
-              <input
-                type="text"
-                value={manualLocation.lat}
-                onChange={(e) => setManualLocation({ ...manualLocation, lat: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Longitude:
-              <input
-                type="text"
-                value={manualLocation.lon}
-                onChange={(e) => setManualLocation({ ...manualLocation, lon: e.target.value })}
-                required
-              />
-            </label>
-            <button type="submit">Get Weather</button>
-          </form>
+    <div className="bg-blue-100 p-6 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Current Weather</h1>
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {weather && (
+        <div className="mb-6">
+          <p>Temperature: {weather.temperature}°C</p>
+          <p>Windspeed: {weather.windspeed} km/h</p>
+          <p>Humidity: {weather.humidity}%</p>
+          <p>Pressure: {weather.pressure} hPa</p>
+          <p>Condition: {getWeatherIcon(weather.weathercode)}</p>
         </div>
+      )}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          {/* Keep your existing buttons and content */}
-        </div>
-      </main>
+      <h2 className="text-xl font-semibold mb-4">Manual Location Input</h2>
+      <form onSubmit={handleManualSubmit} className="mb-6">
+        <label className="block mb-2">
+          Latitude:
+          <input
+            className="border p-2 rounded-lg w-full"
+            type="text"
+            value={manualLocation.lat}
+            onChange={(e) => setManualLocation({ ...manualLocation, lat: e.target.value })}
+            required
+          />
+        </label>
+        <label className="block mb-4">
+          Longitude:
+          <input
+            className="border p-2 rounded-lg w-full"
+            type="text"
+            value={manualLocation.lon}
+            onChange={(e) => setManualLocation({ ...manualLocation, lon: e.target.value })}
+            required
+          />
+        </label>
+        <button className="bg-blue-500 text-white p-2 rounded-lg w-full" type="submit">
+          Get Weather
+        </button>
+      </form>
 
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        {/* Keep your existing footer */}
-      </footer>
+      <h2 className="text-xl font-semibold mb-4">Hourly Temperature Trend</h2>
+      {hourlyTemperature.length > 0 && <Line data={data} />}
     </div>
   );
 }
