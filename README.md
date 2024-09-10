@@ -61,9 +61,9 @@ Make sure you have the following installed:
     - weather/
       - route.ts  // API route for weather data
   - page.tsx  // Main page with weather and chart
+  - globals.css  // Global styles with TailwindCSS
 - public/
 - styles/
-  - globals.css  // Global styles with TailwindCSS
 - tailwind.config.js  // TailwindCSS config
 ```
 
