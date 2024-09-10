@@ -3,6 +3,10 @@
 
 This is a weather application built with Next.js, Chart.js, Axios, and TailwindCSS. It fetches weather data from the Open-Meteo API and displays a temperature trend using a line chart.
 
+## Created by
+
+This project was created by **Mehrdad Izadmehr**.
+
 ## Features
 
 - Automatic geolocation to fetch the current weather.
@@ -10,7 +14,7 @@ This is a weather application built with Next.js, Chart.js, Axios, and TailwindC
 - Displays weather conditions (temperature, windspeed, humidity, pressure) and visual icons.
 - Hourly temperature trend visualization using Chart.js.
 
-## Getting Started
+## Developer Setup Guide
 
 ### Prerequisites
 
@@ -18,40 +22,63 @@ Make sure you have the following installed:
 
 - **Node.js** (>=14.x)
 - **npm** or **yarn**
+- **Git**
 
-### Installation
+### Installation and Setup
 
-1. Clone the repository:
+Follow these steps to set up the project locally:
+
+1. **Clone the repository**:
+
+   Open your terminal and clone the repository using Git:
 
    ```bash
    git clone https://github.com/username/repository-name.git
    ```
 
-2. Navigate into the project directory:
+   Replace `username` and `repository-name` with your GitHub username and repository name.
+
+2. **Navigate into the project directory**:
 
    ```bash
    cd repository-name
    ```
 
-3. Install the dependencies:
+3. **Install dependencies**:
+
+   Run the following command to install all required dependencies for the project:
 
    ```bash
    npm install
    ```
 
-4. (Optional) Create a `.env` file if you need environment-specific configurations.
+4. **Set up environment variables** (optional):
 
-### Running the Project
+   If the project uses environment variables, create a `.env` file in the root directory. Add any necessary environment variables as instructed in the project.
 
-1. Start the development server:
+   Example `.env` file:
+
+   ```
+   API_KEY=your_api_key
+   ```
+
+5. **Run the development server**:
+
+   Start the development server with the following command:
 
    ```bash
    npm run dev
    ```
 
-2. Open [http://localhost:3000](http://localhost:3000) in your browser to see the project.
+6. **Open the project in your browser**:
 
-3. You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   After running the development server, open your browser and go to:
+
+   ```
+   http://localhost:3000
+   ```
+
+7. You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 ### Project Structure
 
@@ -60,11 +87,36 @@ Make sure you have the following installed:
   - api/
     - weather/
       - route.ts  // API route for weather data
-  - page.tsx  // Main page with weather and chart
   - globals.css  // Global styles with TailwindCSS
+  - layout.tsx   // Layout wrapper for the app
+  - page.tsx     // Main page with weather and chart
 - public/
-- styles/
-- tailwind.config.js  // TailwindCSS config
+- tailwind.config.js  // TailwindCSS configuration
+- README.md  // Project documentation
+```
+
+### Running in Production
+
+To run the project in production mode:
+
+1. Build the application:
+
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+
+   ```bash
+   npm run start
+   ```
+
+### Testing (Optional)
+
+If the project includes tests, you can run them with the following command:
+
+```bash
+npm run test
 ```
 
 ### Built With
@@ -84,10 +136,8 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out the Next.js GitHub repository: [Next.js GitHub](https://github.com/vercel/next.js).
 
-### Deployment
 
-To deploy the app, you can use platforms like [Vercel](https://vercel.com) (creators of Next.js). You can find detailed instructions in the [Next.js deployment documentation](https://nextjs.org/docs/deployment).
 
 ### License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is created by **Mehrdad Izadmehr** and is free to use for any developer.
